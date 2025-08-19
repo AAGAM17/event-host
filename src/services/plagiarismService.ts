@@ -1,4 +1,4 @@
-// services/plagiarismService.ts
+// src/services/plagiarismService.ts
 
 export interface ProjectSubmission {
   id: string;
