@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { HomePage } from './pages/HomePage';
@@ -8,6 +7,16 @@ import { TeamPage } from './pages/TeamPage';
 import { SubmissionPage } from './pages/SubmissionPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
+import PlagiarismPage from './pages/PlagiarismPage';
+
+// Mock user data - in a real app, this would come from authentication context
+const mockUser = {
+  id: '1',
+  name: 'John Doe',
+  email: 'john@example.com',
+  role: 'organizer' as const,
+  avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'
+};
 import LoginPage from './pages/LoginPage';
 import ManageEventsPage from './pages/ManageEventsPage';
 
@@ -24,6 +33,7 @@ function App() {
           <Route path="/team" element={<TeamPage />} />
           <Route path="/submission" element={<SubmissionPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/plagiarism" element={<PlagiarismPage />} />
           <Route path="/manage-events" element={<ManageEventsPage />} />
           {/* Add more routes as needed */}
           <Route path="*" element={
