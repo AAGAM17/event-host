@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 export const SignupPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -16,8 +17,6 @@ export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const apiBase = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -25,22 +24,15 @@ export const SignupPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const res = await fetch(`${apiBase}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role })
-      });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || 'Signup failed');
-      }
-      
+      // Use centralized API wrapper which throws ApiError on non-2xx responses
+      // Note: backend may accept 'judge' role but auth API typings are narrower; cast to any to avoid strict type mismatch
+      const data = await (api.auth.register as any)({ name, email, password, role });
+
       if (data?.token) {
         // Use auth context to login
         login(data.token, data.user);
         setMessage('Signup successful! Redirecting...');
-        
+
         // Redirect based on role
         setTimeout(() => {
           if (data.user.role === 'organizer') {
@@ -48,10 +40,14 @@ export const SignupPage: React.FC = () => {
           } else {
             navigate('/dashboard');
           }
-        }, 1500);
+        }, 800);
+      } else {
+        throw new Error('Signup did not return an auth token.');
       }
     } catch (err: any) {
-      setError(err.message || 'Signup failed');
+      // api.ApiError contains details already; normalize messages for UI
+      const msg = err?.message || 'Signup failed';
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

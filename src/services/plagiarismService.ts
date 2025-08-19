@@ -40,29 +40,13 @@ export interface PlagiarismAnalysis {
 
 class PlagiarismDetectionService {
   private existingSubmissions: Map<string, ProjectSubmission> = new Map();
-  
-  // Common coding patterns and structures
-  private commonPatterns = [
-    'function',
-    'class',
-    'interface',
-    'export',
-    'import',
-    'const',
-    'let',
-    'var',
-    'return',
-    'if',
-    'else',
-    'for',
-    'while',
-    'try',
-    'catch'
-  ];
+
+  // Define a minimum similarity threshold
+  private static readonly MINIMUM_SIMILARITY_THRESHOLD = 30;
 
   // Initialize with existing submissions
   constructor(submissions: ProjectSubmission[] = []) {
-    submissions.forEach(submission => {
+    submissions.forEach((submission) => {
       this.existingSubmissions.set(submission.id, submission);
     });
   }
@@ -72,14 +56,14 @@ class PlagiarismDetectionService {
    */
   async analyzeProject(project: ProjectSubmission): Promise<PlagiarismAnalysis> {
     const similarities = await this.compareWithExistingSubmissions(project);
-    const aiAnalysis = this.performAIAnalysis(project, similarities);
-    const overallSimilarity = Math.max(...similarities.map(s => s.similarity), 0);
-    
+    const aiAnalysis = this.performAIAnalysis(project);
+    const overallSimilarity = Math.max(...similarities.map((s) => s.similarity), 0);
+
     return {
       overallSimilarity,
       similarities: similarities.sort((a, b) => b.similarity - a.similarity),
       aiAnalysis,
-      riskLevel: this.calculateRiskLevel(overallSimilarity)
+      riskLevel: this.calculateRiskLevel(overallSimilarity),
     };
   }
 
@@ -276,7 +260,9 @@ class PlagiarismDetectionService {
   /**
    * Perform AI-based analysis
    */
-  private performAIAnalysis(project: ProjectSubmission, similarities: SimilarityResult[]): {
+  private performAIAnalysis(
+    project: ProjectSubmission
+  ): {
     codeStructure: number;
     designPatterns: number;
     functionality: number;
@@ -298,7 +284,7 @@ class PlagiarismDetectionService {
       codeStructure,
       designPatterns,
       functionality,
-      documentation
+      documentation,
     };
   }
 
@@ -306,24 +292,23 @@ class PlagiarismDetectionService {
    * Analyze code structure complexity
    */
   private analyzeCodeStructure(files: FileData[]): number {
-    let complexityScore = 0;
-    let totalFiles = files.length;
-    
+    const totalFiles = files.length;
     if (totalFiles === 0) return 0;
-    
+
+    let complexityScore = 0;
     for (const file of files) {
       const content = file.content.toLowerCase();
-      
+
       // Count functions, classes, interfaces
       const functions = (content.match(/function\s+\w+/g) || []).length;
       const classes = (content.match(/class\s+\w+/g) || []).length;
       const interfaces = (content.match(/interface\s+\w+/g) || []).length;
-      
+
       // Calculate complexity based on structures found
-      const fileComplexity = Math.min(100, (functions * 2 + classes * 3 + interfaces * 2));
+      const fileComplexity = Math.min(100, functions * 2 + classes * 3 + interfaces * 2);
       complexityScore += fileComplexity;
     }
-    
+
     return Math.round(complexityScore / totalFiles);
   }
 

@@ -4,20 +4,53 @@ import {
   Calendar, 
   Users, 
   Clock, 
-  MapPin, 
-  Trophy, 
-  TrendingUp,
-  Star,
-  ArrowRight,
-  Zap,
-  Shield,
-  Globe
+  MapPin
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { useAuth } from '../context/AuthContext';
 
+const stats = [
+  { icon: Calendar, value: '50+', label: 'Events Hosted' },
+  { icon: Users, value: '10K+', label: 'Participants' },
+  { icon: Clock, value: '24/7', label: 'Support' },
+  { icon: MapPin, value: 'Global', label: 'Reach' },
+];
+
+const featuredEvents = [
+  {
+    id: 1,
+    imageUrl: '/path/to/image.jpg',
+    title: 'Hackathon 2023',
+    description: 'An exciting hackathon event.',
+    startDate: '2023-10-01',
+    endDate: '2023-10-03',
+    location: 'New York',
+    currentParticipants: 100,
+    maxParticipants: 200,
+    registrationDeadline: '2023-09-25',
+    status: 'open',
+    type: 'hackathon',
+  },
+];
+
+const formatDate = (date: string): string => new Date(date).toLocaleDateString();
+const getStatusColor = (status: string): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'destructive' | 'outline' => {
+  switch (status) {
+    case 'open':
+      return 'success';
+    case 'closed':
+      return 'destructive';
+    case 'upcoming':
+      return 'warning';
+    default:
+      return 'secondary';
+  }
+};
+
 export const HomePage: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -30,40 +63,12 @@ export const HomePage: React.FC = () => {
               EventHost
             </span>
           </h1>
-          
           <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
             The ultimate platform for hosting and participating in hackathons, 
             tech events, and innovation challenges.
           </p>
-      <section className="relative bg-gradient-to-r from-primary-600 via-purple-600 to-primary-800 overflow-hidden">
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="relative container mx-auto px-4 py-24">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="text-5xl md:text-6xl font-bold font-heading mb-6">
-              Host Epic Hackathons &
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
-                Drive Innovation
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              The complete platform for organizing, participating, and judging hackathons. 
-              Powered by Azure and built for scale.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="bg-white text-primary-600 hover:bg-gray-100">
-                <Link to="/events" className="flex items-center">
-                  Explore Events
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                <Link to="/create-event">Create Event</Link>
-              </Button>
-            </div>
-          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
-      </section>
+      </div>
 
       {/* Stats Section */}
       <section className="container mx-auto px-4">
@@ -105,7 +110,7 @@ export const HomePage: React.FC = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-4 left-4">
-                  <Badge variant={getStatusColor(event.status) as any} className="capitalize">
+                  <Badge variant={getStatusColor(event.status)} className="capitalize">
                     {event.status}
                   </Badge>
                 </div>
@@ -157,79 +162,11 @@ export const HomePage: React.FC = () => {
                     />
                   </div>
                 </div>
-
-          {isAuthenticated ? (
-            <div className="space-y-4">
-              <p className="text-lg text-gray-700 mb-6">
-                Welcome back, <span className="font-semibold">{user?.name}</span>! 
-                You're logged in as a <span className="font-semibold capitalize">{user?.role}</span>.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild>
-                  <Link to="/events">Browse Events</Link>
-                </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link to="/dashboard">Go to Dashboard</Link>
-                </Button>
-                {user?.role === 'organizer' && (
-                  <Button variant="outline" size="lg" asChild>
-                    <Link to="/create-event">Create Event</Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild>
-                  <Link to="/signup">Get Started</Link>
-                </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link to="/login">Sign In</Link>
-                </Button>
-              </div>
-              <p className="text-sm text-gray-500">
-                Join thousands of developers, designers, and innovators
-              </p>
-            </div>
-          )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
-
-      {/* Features Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Real-time Updates</h3>
-            <p className="text-gray-600">Stay connected with live announcements, reminders, and Q&A sessions during events.</p>
-          </div>
-
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Live Polls & Surveys</h3>
-            <p className="text-gray-600">Engage participants with instant polls and get real-time feedback during your events.</p>
-          </div>
-
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Team Collaboration</h3>
-            <p className="text-gray-600">Build teams, manage submissions, and collaborate seamlessly with your event participants.</p>
-          </div>
-        </div>
-      </div>
+      </section>
 
       {/* CTA Section */}
       {!isAuthenticated && (
