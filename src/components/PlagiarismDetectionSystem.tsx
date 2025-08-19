@@ -30,7 +30,24 @@ const PlagiarismDetectionSystem = () => {
       similarity: Math.floor(Math.random() * 100), // This would come from actual analysis
       status: Math.random() > 0.7 ? "FLAGGED" : Math.random() > 0.4 ? "REVIEW" : "SAFE",
       riskLevel: Math.random() > 0.7 ? "HIGH" : Math.random() > 0.4 ? "MEDIUM" : "LOW"
-    }))
+    plagiarismService.getSubmissions().map(sub => {
+      // Try to get analysis results for each submission
+      const analysis = plagiarismService.getAnalysisForSubmission
+        ? plagiarismService.getAnalysisForSubmission(sub.id)
+        : null;
+      return {
+        id: sub.id,
+        title: sub.title,
+        team: sub.teamId,
+        submissionTime: sub.submissionDate.toLocaleString(),
+        similarity: analysis ? analysis.overallSimilarity : null,
+        status: analysis
+          ? (analysis.riskLevel === "HIGH" ? "FLAGGED" :
+             analysis.riskLevel === "MEDIUM" ? "REVIEW" : "SAFE")
+          : "PENDING",
+        riskLevel: analysis ? analysis.riskLevel : null
+      };
+    })
   );
 
   const readFileContent = (file: File): Promise<string> => {
