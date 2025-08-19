@@ -38,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthenticated, onLogout 
     { name: 'Events', href: '/events', icon: Calendar, requireAuth: true },
     { name: 'Leaderboard', href: '/leaderboard', icon: Trophy, requireAuth: true },
     { name: 'Team', href: '/team', icon: Users, requireAuth: true },
+    { name: 'Communication', href: '/communication', icon: Bell, requireAuth: true },
   ];
 
   const handleLogout = () => {

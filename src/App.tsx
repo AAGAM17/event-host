@@ -13,6 +13,7 @@ import { LoginPage } from './pages/LoginPage';
 import ManageEventsPage from './pages/ManageEventsPage';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import CommunicationPage from './pages/CommunicationPage';
 
 function App() {
   return (
@@ -65,6 +66,12 @@ function App() {
             <Route path="/manage-events" element={
               <ProtectedRoute requireOrganizer>
                 <ManageEventsPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/communication" element={
+              <ProtectedRoute>
+                <CommunicationPage />
               </ProtectedRoute>
             } />
             
