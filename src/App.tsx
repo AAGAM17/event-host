@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { HomePage } from './pages/HomePage';
@@ -8,6 +7,7 @@ import { TeamPage } from './pages/TeamPage';
 import { SubmissionPage } from './pages/SubmissionPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
+import PlagiarismPage from './pages/PlagiarismPage';
 
 // Mock user data - in a real app, this would come from authentication context
 const mockUser = {
@@ -30,6 +30,7 @@ function App() {
           <Route path="/team" element={<TeamPage />} />
           <Route path="/submission" element={<SubmissionPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/plagiarism" element={<PlagiarismPage />} />
           {/* Add more routes as needed */}
           <Route path="*" element={
             <div className="container mx-auto px-4 py-16 text-center">
