@@ -1,21 +1,14 @@
 import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { 
-  Calendar, 
-  MapPin, 
-  Users, 
   Plus, 
   Trash2, 
-  Upload,
   Save,
   Eye,
-  Clock
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Input, Textarea } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
-
 interface EventFormData {
   title: string;
   description: string;

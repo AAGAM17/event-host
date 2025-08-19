@@ -12,6 +12,7 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "jspdf": "^3.0.1",
     "lucide-react": "^0.539.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

@@ -17,13 +17,16 @@ const mockUser = {
   role: 'organizer' as const,
   avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'
 };
+import LoginPage from './pages/LoginPage';
+import ManageEventsPage from './pages/ManageEventsPage';
 
 function App() {
   return (
     <Router>
-      <Layout user={mockUser} notifications={3}>
+      <Layout>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/create-event" element={<CreateEventPage />} />
@@ -31,6 +34,7 @@ function App() {
           <Route path="/submission" element={<SubmissionPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/plagiarism" element={<PlagiarismPage />} />
+          <Route path="/manage-events" element={<ManageEventsPage />} />
           {/* Add more routes as needed */}
           <Route path="*" element={
             <div className="container mx-auto px-4 py-16 text-center">
