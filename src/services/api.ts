@@ -1,14 +1,16 @@
 // src/services/api.ts
 import type { ProjectSubmission, PlagiarismAnalysis } from './plagiarismService';
-import type { 
-  Event, 
-  Team, 
-  Project, 
-  User, 
+import type {
+  Event,
+  Team,
+  Project,
+  User,
   Registration,
   Analytics,
   ApiResponse,
-  PaginatedResponse 
+  PaginatedResponse,
+  AuthUser,
+  RegisterData,
 } from '../types';
 
 // Use Vite's import.meta.env instead of process.env for client-side
@@ -304,13 +306,8 @@ export const authAPI = {
   /**
    * Register user
    */
-  register: async (userData: {
-    name: string;
-    email: string;
-    password: string;
-    role: 'participant' | 'organizer';
-  }): Promise<{ user: User; token: string }> => {
-    return apiRequest('/api/auth/register', {
+  register: async (userData: RegisterData): Promise<{ user: AuthUser; token: string }> => {
+    return apiRequest('/api/auth/signup', {
       method: 'POST',
       body: JSON.stringify(userData),
     });

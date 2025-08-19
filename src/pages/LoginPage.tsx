@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,8 +13,7 @@ export const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const apiBase = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
+  const auth = useAuth();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,32 +21,29 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const res = await fetch(`${apiBase}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || 'Login failed');
-      }
-      
+      const data = await api.auth.login({ email, password });
+
       if (data?.token) {
+        // Persist token and update auth context
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('user_role', data.user.role);
         localStorage.setItem('user_name', data.user.name);
         localStorage.setItem('user_id', data.user.id);
-        
+
+  // Update auth context to sync state
+  auth.login(data.token, data.user as any);
+
         // Redirect based on role
         if (data.user.role === 'organizer') {
           navigate('/events');
         } else {
           navigate('/dashboard');
         }
+      } else {
+        throw new Error('Login did not return an auth token.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err) {
+      setError((err as Error)?.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +78,8 @@ export const LoginPage: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
               <select
                 value={role}
-                onChange={(e) => setRole(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRole(e.target.value as
+                  'participant' | 'organizer' | 'judge')}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
               >
                 <option value="participant">Participant</option>

@@ -1,11 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'participant' | 'organizer' | 'judge';
-};
+import type { AuthUser } from '../types';
+
+type User = AuthUser;
 
 type AuthContextType = {
   user: User | null;
@@ -33,8 +30,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser({
         id: userId,
         name: userName,
-        email: '', // We don't store email in localStorage for security
-        role: userRole as 'participant' | 'organizer' | 'judge'
+  email: '', // We don't store email in localStorage for security
+  role: userRole as 'participant' | 'organizer' | 'judge',
+  isEmailVerified: false,
       });
     }
     setLoading(false);

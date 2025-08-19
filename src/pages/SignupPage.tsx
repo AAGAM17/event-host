@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -5,6 +6,7 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import type { RegisterData, AuthUser } from '../types';
 
 export const SignupPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -25,12 +27,12 @@ export const SignupPage: React.FC = () => {
     
     try {
       // Use centralized API wrapper which throws ApiError on non-2xx responses
-      // Note: backend may accept 'judge' role but auth API typings are narrower; cast to any to avoid strict type mismatch
-      const data = await (api.auth.register as any)({ name, email, password, role });
+  const registerPayload: RegisterData = { name, email, password, role };
+  const data = await api.auth.register(registerPayload);
 
       if (data?.token) {
         // Use auth context to login
-        login(data.token, data.user);
+  login(data.token, data.user as AuthUser);
         setMessage('Signup successful! Redirecting...');
 
         // Redirect based on role
@@ -44,9 +46,9 @@ export const SignupPage: React.FC = () => {
       } else {
         throw new Error('Signup did not return an auth token.');
       }
-    } catch (err: any) {
+    } catch (err) {
       // api.ApiError contains details already; normalize messages for UI
-      const msg = err?.message || 'Signup failed';
+      const msg = (err as Error)?.message || 'Signup failed';
       setError(msg);
     } finally {
       setIsLoading(false);
