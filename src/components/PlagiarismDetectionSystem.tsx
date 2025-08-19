@@ -29,7 +29,9 @@ const PlagiarismDetectionSystem = () => {
       submissionTime: sub.submissionDate.toLocaleString(),
       similarity: Math.floor(Math.random() * 100), // This would come from actual analysis
       status: Math.random() > 0.7 ? "FLAGGED" : Math.random() > 0.4 ? "REVIEW" : "SAFE",
-      riskLevel: Math.random() > 0.7 ? "HIGH" : Math.random() > 0.4 ? "MEDIUM" : "LOW"
+      similarity: null, // TODO: Populate with actual analysis results
+      status: "UNKNOWN", // TODO: Populate with actual analysis results
+      riskLevel: "UNKNOWN" // TODO: Populate with actual analysis results
     plagiarismService.getSubmissions().map(sub => {
       // Try to get analysis results for each submission
       const analysis = plagiarismService.getAnalysisForSubmission
