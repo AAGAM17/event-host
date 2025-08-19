@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Search, 
+  Bell, 
+  User, 
+  LogOut, 
+  Menu, 
 import { Link } from 'react-router-dom';
 import {
   Search,
@@ -16,6 +23,7 @@ import {
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 
+
 interface HeaderProps {
   user?: {
     id: string;
@@ -23,21 +31,29 @@ interface HeaderProps {
     email: string;
     role: 'participant' | 'organizer' | 'judge';
     avatar?: string;
-  };
-  notifications?: number;
+  } | null;
+  isAuthenticated: boolean;
+  onLogout: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
+export const Header: React.FC<HeaderProps> = ({ user, isAuthenticated, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-    { name: 'Events', href: '/events', icon: Calendar },
-    { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
-    { name: 'Team', href: '/team', icon: Users },
+    { name: 'Dashboard', href: '/dashboard', icon: BarChart3, requireAuth: true },
+    { name: 'Events', href: '/events', icon: Calendar, requireAuth: true },
+    { name: 'Leaderboard', href: '/leaderboard', icon: Trophy, requireAuth: true },
+    { name: 'Team', href: '/team', icon: Users, requireAuth: true },
+    { name: 'Communication', href: '/communication', icon: Bell, requireAuth: true },
   ];
 
+  const handleLogout = () => {
+    onLogout();
+    navigate('/');
+    setIsProfileOpen(false);
+  };
   const organizerItems = [
     { name: 'Create Event', href: '/create-event' },
     { name: 'My Events', href: '/my-events' },
@@ -55,6 +71,31 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
+          <div className="flex items-center space-x-8">
+            <Link to="/" className="text-2xl font-bold text-primary-600">
+              EventHost
+            </Link>
+            
+            {/* Navigation - Desktop */}
+            <nav className="hidden md:flex items-center space-x-6">
+              {navItems.map((item) => {
+                if (item.requireAuth && !isAuthenticated) return null;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+              
+              {user?.role === 'organizer' && (
+                <Link to="/create-event" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  Create Event
           <Link to="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-primary-600 to-purple-600 flex items-center justify-center">
               <span className="text-white font-bold text-lg">E</span>
@@ -104,6 +145,12 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
             </div>
           </div>
 
+            {/* User Actions */}
+            {isAuthenticated && user ? (
+              <div className="flex items-center space-x-3">
+                {/* Notifications */}
+                <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                  <Bell className="h-5 w-5" />
           {/* Right side */}
           <div className="flex items-center space-x-4">
             {user ? (
@@ -129,10 +176,36 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
                       </div>
                     )}
                     <span className="hidden md:block text-sm font-medium">{user.name}</span>
+                    <Badge variant="secondary" size="sm">{user.role}</Badge>
                   </button>
 
                   {/* Profile Dropdown */}
                   {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <User className="mr-3 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                      <Link
+                        to="/events"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        <Calendar className="mr-3 h-4 w-4" />
+                        Events
+                      </Link>
+                      <hr className="my-1" />
+                      <button
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-3 h-4 w-4" />
+                        Logout
+                      </button>
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-md shadow-lg border py-1">
                       <div className="px-4 py-2 border-b">
                         <p className="text-sm font-medium">{user.name}</p>
@@ -175,6 +248,7 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
           <div className="md:hidden border-t border-gray-200 py-4">
             <nav className="space-y-2 px-4">
               {navItems.map((item) => {
+                if (item.requireAuth && !isAuthenticated) return null;
                 const Icon = item.icon;
                 return (
                   <Link key={item.name} to={item.href} className="flex items-center space-x-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
@@ -185,6 +259,23 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
               })}
 
               {user?.role === 'organizer' && (
+                <div className="pt-2 border-t border-gray-200">
+                  <h3 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Organizer
+                  </h3>
+                  <Link
+                    to="/create-event"
+                    className="block py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  >
+                    Create Event
+                  </Link>
+                  <Link
+                    to="/manage-events"
+                    className="block py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  >
+                    Manage Events
+                  </Link>
+                </div>
                 <>
                   <div className="border-t pt-2 mt-2">
                     <p className="text-sm font-medium text-gray-500 mb-2">Organize</p>
