@@ -16,6 +16,7 @@ import {
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import SponsorShowcase from '../components/ui/SponsorShowcase';
 
 // Mock data
 const featuredEvents = [
@@ -284,6 +285,9 @@ export const HomePage: React.FC = () => {
           </Button>
         </div>
       </section>
+
+      {/* Sponsor & Partner Showcase */}
+      <SponsorShowcase />
 
       {/* Features Section */}
       <section className="bg-white py-16">

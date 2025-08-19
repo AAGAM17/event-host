@@ -1,15 +1,16 @@
+export type UserRole = "participant" | "organizer" | "judge";
+
 export interface User {
   id: string;
-  email: string;
   name: string;
-  role: 'participant' | 'organizer' | 'judge';
-  avatar?: string;
-  bio?: string;
-  skills?: string[];
-  university?: string;
-  linkedIn?: string;
-  github?: string;
+  role: UserRole;
 }
+
+export const mockCurrentUser: User = {
+  id: "1",
+  name: "Alice",
+  role: "participant", // change to "organizer" or "judge" to test
+};
 
 export interface Event {
   id: string;
