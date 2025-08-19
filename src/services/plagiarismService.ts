@@ -201,7 +201,22 @@ class PlagiarismDetectionService {
       // Remove extra whitespace
       .replace(/\s+/g, ' ')
       // Remove variable names (basic approach)
-      .replace(/\b[a-zA-Z_$][a-zA-Z0-9_$]*\b/g, 'VAR')
+    // List of common JS/TS keywords to exclude from replacement
+    const keywords = new Set([
+      'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+      'enum', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof',
+      'new', 'null', 'return', 'super', 'switch', 'this', 'throw', 'true', 'try', 'typeof', 'var', 'void',
+      'while', 'with', 'yield', 'let', 'static', 'await', 'implements', 'package', 'protected', 'interface',
+      'private', 'public'
+    ]);
+    return code
+      // Remove comments
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/.*$/gm, '')
+      // Remove extra whitespace
+      .replace(/\s+/g, ' ')
+      // Remove variable names (exclude keywords)
+      .replace(/\b[a-zA-Z_$][a-zA-Z0-9_$]*\b/g, (match) => keywords.has(match) ? match : 'VAR')
       // Remove strings
       .replace(/(["'`])(?:(?=(\\?))\2.)*?\1/g, 'STRING')
       .trim();
