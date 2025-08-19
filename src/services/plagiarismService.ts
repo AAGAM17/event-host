@@ -477,6 +477,44 @@ export const plagiarismService = new PlagiarismDetectionService([
     teamId: 'team-beta',
     submissionDate: new Date('2024-08-10')
   }
-]);
+// Export singleton instance for production (no mock data)
+export const plagiarismService = new PlagiarismDetectionService();
+// Helper for tests: create a service with mock submissions
+export function createMockPlagiarismService(): PlagiarismDetectionService {
+  return new PlagiarismDetectionService([
+    {
+      id: 'mock-1',
+      title: 'TaskMaster Pro',
+      description: 'A comprehensive task management application with real-time collaboration features',
+      codeFiles: [
+        {
+          name: 'src/components/TaskList.tsx',
+          content: 'import React from "react"; export const TaskList = () => { return <div>Tasks</div>; };',
+          type: 'text/typescript',
+          size: 1024
+        }
+      ],
+      documentation: 'This project implements a task management system using React and TypeScript.',
+      teamId: 'team-alpha',
+      submissionDate: new Date('2024-08-15')
+    },
+    {
+      id: 'mock-2',
+      title: 'Event Planner Plus',
+      description: 'Modern event planning platform with advanced scheduling capabilities',
+      codeFiles: [
+        {
+          name: 'src/pages/EventPage.tsx',
+          content: 'import React from "react"; export const EventPage = () => { return <div>Events</div>; };',
+          type: 'text/typescript',
+          size: 856
+        }
+      ],
+      documentation: 'Event planning application built with modern web technologies.',
+      teamId: 'team-beta',
+      submissionDate: new Date('2024-08-10')
+    }
+  ]);
+}
 
 export default plagiarismService;
