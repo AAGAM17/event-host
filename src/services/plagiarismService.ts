@@ -94,7 +94,7 @@ class PlagiarismDetectionService {
       
       const similarity = await this.calculateSimilarity(project, existingProject);
       
-      if (similarity.overall > 15) { // Only include meaningful similarities
+      if (similarity.overall > PlagiarismDetectionService.MINIMUM_SIMILARITY_THRESHOLD) { // Only include meaningful similarities
         results.push({
           projectId: id,
           projectName: existingProject.title,
