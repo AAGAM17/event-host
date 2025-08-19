@@ -3,49 +3,55 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
-export const LoginPage: React.FC = () => {
+export const SignupPage: React.FC = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'participant' | 'organizer' | 'judge'>('participant');
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const apiBase = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
     setIsLoading(true);
     
     try {
-      const res = await fetch(`${apiBase}/api/auth/login`, {
+      const res = await fetch(`${apiBase}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ name, email, password, role })
       });
       
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data?.error || 'Login failed');
+        throw new Error(data?.error || 'Signup failed');
       }
       
       if (data?.token) {
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('user_role', data.user.role);
-        localStorage.setItem('user_name', data.user.name);
-        localStorage.setItem('user_id', data.user.id);
+        // Use auth context to login
+        login(data.token, data.user);
+        setMessage('Signup successful! Redirecting...');
         
         // Redirect based on role
-        if (data.user.role === 'organizer') {
-          navigate('/events');
-        } else {
-          navigate('/dashboard');
-        }
+        setTimeout(() => {
+          if (data.user.role === 'organizer') {
+            navigate('/events');
+          } else {
+            navigate('/dashboard');
+          }
+        }, 1500);
       }
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Signup failed');
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +61,17 @@ export const LoginPage: React.FC = () => {
     <div className="container mx-auto px-4 py-12 max-w-md">
       <Card>
         <CardHeader>
-          <CardTitle>Sign In</CardTitle>
+          <CardTitle>Create an account</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={onSubmit} className="space-y-4">
+            <Input 
+              label="Name" 
+              placeholder="Your name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              required 
+            />
             <Input 
               label="Email" 
               type="email" 
@@ -90,22 +103,27 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <Button type="submit" isLoading={isLoading} className="w-full">
-              Sign In
+              Sign Up
             </Button>
           </form>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Already have an account?{' '}
               <button 
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/login')}
                 className="text-primary-600 hover:text-primary-700 font-medium"
               >
-                Sign up
+                Sign in
               </button>
             </p>
           </div>
 
+          {message && (
+            <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded p-2">
+              {message}
+            </div>
+          )}
           {error && (
             <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">
               {error}
@@ -116,3 +134,5 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
+
+
