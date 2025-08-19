@@ -442,9 +442,8 @@ class PlagiarismDetectionService {
   }
 }
 
-// Export singleton instance
+// Export singleton instance (includes mock data for development)
 export const plagiarismService = new PlagiarismDetectionService([
-  // Mock initial submissions for testing
   {
     id: 'mock-1',
     title: 'TaskMaster Pro',
@@ -477,8 +476,8 @@ export const plagiarismService = new PlagiarismDetectionService([
     teamId: 'team-beta',
     submissionDate: new Date('2024-08-10')
   }
-// Export singleton instance for production (no mock data)
-export const plagiarismService = new PlagiarismDetectionService();
+]);
+
 // Helper for tests: create a service with mock submissions
 export function createMockPlagiarismService(): PlagiarismDetectionService {
   return new PlagiarismDetectionService([

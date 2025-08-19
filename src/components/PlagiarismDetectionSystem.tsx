@@ -22,21 +22,12 @@ const PlagiarismDetectionSystem = () => {
 
   // Get real submissions from the plagiarism service
   const [submissions, setSubmissions] = useState(
-    plagiarismService.getSubmissions().map(sub => ({
-      id: sub.id,
-      title: sub.title,
-      team: sub.teamId,
-      submissionTime: sub.submissionDate.toLocaleString(),
-      similarity: Math.floor(Math.random() * 100), // This would come from actual analysis
-      status: Math.random() > 0.7 ? "FLAGGED" : Math.random() > 0.4 ? "REVIEW" : "SAFE",
-      similarity: null, // TODO: Populate with actual analysis results
-      status: "UNKNOWN", // TODO: Populate with actual analysis results
-      riskLevel: "UNKNOWN" // TODO: Populate with actual analysis results
     plagiarismService.getSubmissions().map(sub => {
-      // Try to get analysis results for each submission
+      // Try to get analysis results for each submission (may be undefined initially)
       const analysis = plagiarismService.getAnalysisForSubmission
         ? plagiarismService.getAnalysisForSubmission(sub.id)
         : null;
+
       return {
         id: sub.id,
         title: sub.title,
@@ -44,10 +35,9 @@ const PlagiarismDetectionSystem = () => {
         submissionTime: sub.submissionDate.toLocaleString(),
         similarity: analysis ? analysis.overallSimilarity : null,
         status: analysis
-          ? (analysis.riskLevel === "HIGH" ? "FLAGGED" :
-             analysis.riskLevel === "MEDIUM" ? "REVIEW" : "SAFE")
-          : "PENDING",
-        riskLevel: analysis ? analysis.riskLevel : null
+          ? (analysis.riskLevel === 'HIGH' ? 'FLAGGED' : analysis.riskLevel === 'MEDIUM' ? 'REVIEW' : 'SAFE')
+          : 'PENDING',
+        riskLevel: analysis ? analysis.riskLevel : null,
       };
     })
   );
