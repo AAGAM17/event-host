@@ -7,6 +7,7 @@ import {
   MapPin, 
   Trophy, 
   TrendingUp,
+  Star,
   ArrowRight,
   Zap,
   Shield,
@@ -117,46 +118,48 @@ export const HomePage: React.FC = () => {
   return (
     <div className="space-y-16">
       {/* Hero Section */}
-      <section className="relative bg-white border-b">
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-gray-900">
+      <section className="relative bg-gradient-to-r from-primary-600 via-purple-600 to-primary-800 overflow-hidden">
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative container mx-auto px-4 py-24">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h1 className="text-5xl md:text-6xl font-bold font-heading mb-6">
               Host Epic Hackathons &
-              <span className="block text-primary-600">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
                 Drive Innovation
               </span>
             </h1>
-            <p className="text-lg md:text-xl mb-8 text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl mb-8 text-blue-100">
               The complete platform for organizing, participating, and judging hackathons. 
               Powered by Azure and built for scale.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="bg-primary-600 text-white hover:bg-primary-700">
+              <Button size="lg" className="bg-white text-primary-600 hover:bg-gray-100">
                 <Link to="/events" className="flex items-center">
                   Explore Events
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-primary-600 text-primary-600 hover:bg-primary-50">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                 <Link to="/create-event">Create Event</Link>
               </Button>
             </div>
           </div>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent" />
       </section>
 
       {/* Stats Section */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
               <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-50 rounded-lg mb-4">
-                  <Icon className="h-8 w-8 text-primary-600" />
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mb-4">
+                  <Icon className="h-6 w-6 text-primary-600" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
+                <div className="text-gray-600">{stat.label}</div>
               </div>
             );
           })}
@@ -169,7 +172,7 @@ export const HomePage: React.FC = () => {
           <h2 className="text-3xl md:text-4xl font-bold font-heading mb-4">
             Featured Hackathons
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Discover amazing hackathons happening around the world. From AI/ML to sustainability, 
             find the perfect event to showcase your skills.
           </p>
@@ -185,7 +188,7 @@ export const HomePage: React.FC = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-4 left-4">
-                  <Badge variant={getStatusColor(event.status)} className="capitalize">
+                  <Badge variant={getStatusColor(event.status) as any} className="capitalize">
                     {event.status}
                   </Badge>
                 </div>
