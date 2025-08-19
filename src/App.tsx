@@ -1,4 +1,4 @@
-import React from 'react';
+// React import not needed with react-jsx runtime
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { HomePage } from './pages/HomePage';
@@ -8,6 +8,8 @@ import { TeamPage } from './pages/TeamPage';
 import { SubmissionPage } from './pages/SubmissionPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
+import { CommunicationPage } from './pages/CommunicationPage';
+import { SocketProvider } from './context/SocketProvider';
 
 // Mock user data - in a real app, this would come from authentication context
 const mockUser = {
@@ -21,24 +23,27 @@ const mockUser = {
 function App() {
   return (
     <Router>
-      <Layout user={mockUser} notifications={3}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/create-event" element={<CreateEventPage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/submission" element={<SubmissionPage />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          {/* Add more routes as needed */}
-          <Route path="*" element={
-            <div className="container mx-auto px-4 py-16 text-center">
-              <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
-              <p className="text-gray-600">The page you're looking for doesn't exist.</p>
-            </div>
-          } />
-        </Routes>
-      </Layout>
+      <SocketProvider role={mockUser.role}>
+        <Layout user={mockUser} notifications={3}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/create-event" element={<CreateEventPage />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/submission" element={<SubmissionPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/communication" element={<CommunicationPage />} />
+            {/* Add more routes as needed */}
+            <Route path="*" element={
+              <div className="container mx-auto px-4 py-16 text-center">
+                <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
+                <p className="text-gray-600">The page you're looking for doesn't exist.</p>
+              </div>
+            } />
+          </Routes>
+        </Layout>
+      </SocketProvider>
     </Router>
   );
 }

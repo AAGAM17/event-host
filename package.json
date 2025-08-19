@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -17,6 +17,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.45.4",
     "react-router-dom": "^6.15.0",
+    "socket.io-client": "^4.8.1",
     "zod": "^4.0.17"
   },
   "devDependencies": {

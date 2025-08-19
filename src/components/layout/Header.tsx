@@ -36,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
     { name: 'Events', href: '/events', icon: Calendar },
     { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'Team', href: '/team', icon: Users },
+    { name: 'Communication', href: '/communication', icon: Bell },
   ];
 
   return (
