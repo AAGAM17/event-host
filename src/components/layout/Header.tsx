@@ -65,9 +65,10 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
               })}
               
               {user?.role === 'organizer' && (
-                <button className="text-gray-600 hover:text-gray-900 transition-colors">
-                  Organize
-                </button>
+                <Link to="/manage-events" className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Manage Events</span>
+                </Link>
               )}
             </nav>
           </div>
@@ -194,23 +195,13 @@ export const Header: React.FC<HeaderProps> = ({ user, notifications = 0 }) => {
               })}
               
               {user?.role === 'organizer' && (
-                <div className="pt-2 border-t border-gray-200">
-                  <h3 className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Organizer
-                  </h3>
-                  <Link
-                    to="/create-event"
-                    className="block py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                  >
-                    Create Event
-                  </Link>
-                  <Link
-                    to="/my-events"
-                    className="block py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                  >
-                    My Events
-                  </Link>
-                </div>
+                <Link
+                  to="/manage-events"
+                  className="block py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Manage Events
+                </Link>
               )}
             </nav>
 
