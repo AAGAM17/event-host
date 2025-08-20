@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Search, 
-  Filter, 
   Calendar, 
   Users, 
   MapPin, 
@@ -10,152 +9,157 @@ import {
   Clock,
   Grid,
   List,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Plus
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
+import { Input, Textarea } from '../components/ui/Input';
+import { useAuth } from '../context/AuthContext';
 
-// Mock data - would be replaced with API call
-const events = [
-  {
-    id: '1',
-    title: 'SynapHack 3.0',
-    description: 'Build the future of innovation with cutting-edge technology',
-    theme: 'Innovation & Technology',
-    type: 'hybrid' as const,
-    status: 'upcoming' as const,
-    startDate: new Date('2024-09-15'),
-    endDate: new Date('2024-09-17'),
-    registrationDeadline: new Date('2024-09-10'),
-    currentParticipants: 847,
-    maxParticipants: 1000,
-    location: 'San Francisco, CA',
-    imageUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=500&h=300&fit=crop',
-    prizes: ['$10,000', '$5,000', '$2,500'],
-    tracks: ['AI/ML', 'Web3', 'FinTech', 'Healthcare'],
-    organizers: ['TechCorp', 'Innovation Hub']
-  },
-  {
-    id: '2',
-    title: 'EcoHack 2024',
-    description: 'Sustainable solutions for a better tomorrow',
-    theme: 'Sustainability',
-    type: 'online' as const,
-    status: 'ongoing' as const,
-    startDate: new Date('2024-08-20'),
-    endDate: new Date('2024-08-22'),
-    registrationDeadline: new Date('2024-08-15'),
-    currentParticipants: 623,
-    maxParticipants: 800,
-    location: 'Virtual',
-    imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&h=300&fit=crop',
-    prizes: ['$8,000', '$4,000', '$2,000'],
-    tracks: ['Clean Energy', 'Agriculture', 'Climate Tech', 'Waste Management'],
-    organizers: ['GreenTech Foundation']
-  },
-  {
-    id: '3',
-    title: 'HealthTech Innovation',
-    description: 'Revolutionizing healthcare through technology',
-    theme: 'Healthcare',
-    type: 'offline' as const,
-    status: 'upcoming' as const,
-    startDate: new Date('2024-09-25'),
-    endDate: new Date('2024-09-27'),
-    registrationDeadline: new Date('2024-09-20'),
-    currentParticipants: 342,
-    maxParticipants: 500,
-    location: 'Boston, MA',
-    imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=500&h=300&fit=crop',
-    prizes: ['$12,000', '$6,000', '$3,000'],
-    tracks: ['Digital Health', 'Medical Devices', 'Biotechnology', 'Telemedicine'],
-    organizers: ['MedTech Alliance', 'Harvard Medical']
-  },
-  {
-    id: '4',
-    title: 'Web3 Builders Summit',
-    description: 'Building the decentralized future',
-    theme: 'Blockchain & Web3',
-    type: 'hybrid' as const,
-    status: 'upcoming' as const,
-    startDate: new Date('2024-10-05'),
-    endDate: new Date('2024-10-07'),
-    registrationDeadline: new Date('2024-09-30'),
-    currentParticipants: 234,
-    maxParticipants: 600,
-    location: 'Austin, TX',
-    imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=500&h=300&fit=crop',
-    prizes: ['$15,000', '$8,000', '$4,000'],
-    tracks: ['DeFi', 'NFTs', 'DAOs', 'Infrastructure'],
-    organizers: ['Web3 Foundation', 'Blockchain Labs']
-  },
-  {
-    id: '5',
-    title: 'AI for Good Challenge',
-    description: 'Using artificial intelligence to solve world problems',
-    theme: 'AI & Social Impact',
-    type: 'online' as const,
-    status: 'completed' as const,
-    startDate: new Date('2024-07-15'),
-    endDate: new Date('2024-07-17'),
-    registrationDeadline: new Date('2024-07-10'),
-    currentParticipants: 956,
-    maxParticipants: 1000,
-    location: 'Virtual',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=500&h=300&fit=crop',
-    prizes: ['$20,000', '$10,000', '$5,000'],
-    tracks: ['Education', 'Environment', 'Healthcare', 'Social Justice'],
-    organizers: ['AI Ethics Institute', 'Global Impact Fund']
-  },
-  {
-    id: '6',
-    title: 'FinTech Revolution',
-    description: 'Reimagining the future of finance',
-    theme: 'Financial Technology',
-    type: 'offline' as const,
-    status: 'upcoming' as const,
-    startDate: new Date('2024-11-10'),
-    endDate: new Date('2024-11-12'),
-    registrationDeadline: new Date('2024-11-05'),
-    currentParticipants: 123,
-    maxParticipants: 400,
-    location: 'New York, NY',
-    imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&h=300&fit=crop',
-    prizes: ['$18,000', '$9,000', '$4,500'],
-    tracks: ['Digital Banking', 'Payments', 'Trading', 'RegTech'],
-    organizers: ['FinTech Accelerator', 'NYSE']
-  }
-];
+// API base URL
+const API_BASE = 'http://localhost:5000';
+
+// Event type from backend
+type Event = {
+  _id: string;
+  title: string;
+  description: string;
+  theme: string;
+  type: 'online' | 'offline' | 'hybrid';
+  status?: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline: string;
+  currentParticipants?: number;
+  maxParticipants: number;
+  location: string;
+  imageUrl?: string;
+  prizes: string[];
+  tracks: string[];
+  organizers: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 const themes = ['All', 'Innovation & Technology', 'Sustainability', 'Healthcare', 'Blockchain & Web3', 'AI & Social Impact', 'Financial Technology'];
 const types = ['All', 'Online', 'Offline', 'Hybrid'];
-const statuses = ['All', 'Upcoming', 'Ongoing', 'Completed'];
+
 
 export const EventsPage: React.FC = () => {
+  const { isAuthenticated, isOrganizer } = useAuth();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
-  const [selectedStatus, setSelectedStatus] = useState('All');
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
+  // Event creation form state
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    description: '',
+    theme: '',
+    type: 'online' as const,
+    startDate: '',
+    endDate: '',
+    registrationDeadline: '',
+    maxParticipants: 100,
+    location: '',
+    imageUrl: '',
+    organizers: [''],
+    tracks: [''],
+    prizes: ['']
+  });
+
+  // Fetch events from API
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE}/api/events`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      const data = await response.json();
+      setEvents(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createEvent = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        setError('Please login first');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/api/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newEvent)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create event');
+      }
+
+      const createdEvent = await response.json();
+      setEvents(prev => [createdEvent, ...prev]);
+      setShowCreateForm(false);
+      setNewEvent({
+        title: '',
+        description: '',
+        theme: '',
+        type: 'online',
+        startDate: '',
+        endDate: '',
+        registrationDeadline: '',
+        maxParticipants: 100,
+        location: '',
+        imageUrl: '',
+        organizers: [''],
+        tracks: [''],
+        prizes: ['']
+      });
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
       year: 'numeric'
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ongoing': return 'success';
-      case 'upcoming': return 'primary';
-      case 'completed': return 'secondary';
-      default: return 'default';
-    }
+  const getStatusColor = (event: Event) => {
+    const now = new Date();
+    const startDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
+    
+    if (now < startDate) return 'primary';
+    if (now >= startDate && now <= endDate) return 'success';
+    return 'secondary';
   };
 
   const filteredEvents = events.filter(event => {
@@ -164,22 +168,28 @@ export const EventsPage: React.FC = () => {
                          event.theme.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTheme = selectedTheme === 'All' || event.theme === selectedTheme;
     const matchesType = selectedType === 'All' || event.type === selectedType.toLowerCase();
-    const matchesStatus = selectedStatus === 'All' || event.status === selectedStatus.toLowerCase();
     
-    return matchesSearch && matchesTheme && matchesType && matchesStatus;
+    return matchesSearch && matchesTheme && matchesType;
   });
 
-  const EventCard: React.FC<{ event: typeof events[0] }> = ({ event }) => (
+  const EventCard: React.FC<{ event: Event }> = ({ event }) => (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          className="w-full h-48 object-cover"
-        />
+        {event.imageUrl ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="w-full h-48 object-cover"
+          />
+        ) : (
+          <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <Calendar className="h-16 w-16 text-gray-400" />
+          </div>
+        )}
         <div className="absolute top-4 left-4">
-          <Badge variant={getStatusColor(event.status) as any} className="capitalize">
-            {event.status}
+          <Badge variant={getStatusColor(event)} className="capitalize">
+            {getStatusColor(event) === 'primary' ? 'upcoming' : 
+             getStatusColor(event) === 'success' ? 'ongoing' : 'completed'}
           </Badge>
         </div>
         <div className="absolute top-4 right-4">
@@ -194,7 +204,7 @@ export const EventsPage: React.FC = () => {
           <div className="flex-1">
             <CardTitle className="text-xl mb-2">{event.title}</CardTitle>
             <CardDescription className="mb-3">{event.description}</CardDescription>
-            <Badge variant="outline" size="sm">{event.theme}</Badge>
+            <Badge variant="secondary" size="sm">{event.theme}</Badge>
           </div>
         </div>
       </CardHeader>
@@ -212,7 +222,7 @@ export const EventsPage: React.FC = () => {
           </div>
           <div className="flex items-center text-gray-600">
             <Users className="h-4 w-4 mr-2 flex-shrink-0" />
-            {event.currentParticipants} / {event.maxParticipants} participants
+            {event.currentParticipants || 0} / {event.maxParticipants} participants
           </div>
           <div className="flex items-center text-gray-600">
             <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -224,139 +234,196 @@ export const EventsPage: React.FC = () => {
         <div>
           <div className="flex justify-between text-sm mb-1">
             <span>Registration Progress</span>
-            <span>{Math.round((event.currentParticipants / (event.maxParticipants || 1)) * 100)}%</span>
+            <span>{Math.round(((event.currentParticipants || 0) / event.maxParticipants) * 100)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-primary-600 h-2 rounded-full"
               style={{ 
-                width: `${Math.min((event.currentParticipants / (event.maxParticipants || 1)) * 100, 100)}%` 
+                width: `${Math.min(((event.currentParticipants || 0) / event.maxParticipants) * 100, 100)}%` 
               }}
             />
           </div>
         </div>
 
         {/* Tracks */}
-        <div>
-          <p className="text-sm font-medium mb-2">Tracks:</p>
-          <div className="flex flex-wrap gap-1">
-            {event.tracks.slice(0, 3).map((track, index) => (
-              <Badge key={index} variant="secondary" size="sm">
-                {track}
-              </Badge>
-            ))}
-            {event.tracks.length > 3 && (
-              <Badge variant="secondary" size="sm">
-                +{event.tracks.length - 3} more
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Organizers */}
-        <div>
-          <p className="text-sm font-medium mb-1">Organized by:</p>
-          <p className="text-sm text-gray-600">{event.organizers.join(', ')}</p>
-        </div>
-
-        {/* Prizes and Action */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center">
-            <Trophy className="h-4 w-4 text-yellow-500 mr-1" />
-            <span className="text-sm font-medium">
-              {event.prizes[0]}
-            </span>
-          </div>
-          <Button size="sm">
-            <Link to={`/events/${event.id}`}>View Details</Link>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const EventListItem: React.FC<{ event: typeof events[0] }> = ({ event }) => (
-    <Card className="p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start space-x-4">
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
-        />
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="text-xl font-semibold mb-1">{event.title}</h3>
-              <p className="text-gray-600 mb-2">{event.description}</p>
-              <div className="flex items-center space-x-2">
-                <Badge variant={getStatusColor(event.status) as any} className="capitalize">
-                  {event.status}
-                </Badge>
-                <Badge variant="secondary" className="capitalize">
-                  {event.type}
-                </Badge>
-                <Badge variant="outline" size="sm">{event.theme}</Badge>
-              </div>
-            </div>
-            <Button size="sm">
-              <Link to={`/events/${event.id}`}>View Details</Link>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-4">
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 mr-1" />
-              {formatDate(event.startDate)}
-            </div>
-            <div className="flex items-center">
-              <MapPin className="h-4 w-4 mr-1" />
-              {event.location}
-            </div>
-            <div className="flex items-center">
-              <Users className="h-4 w-4 mr-1" />
-              {event.currentParticipants} participants
-            </div>
-            <div className="flex items-center">
-              <Trophy className="h-4 w-4 mr-1 text-yellow-500" />
-              {event.prizes[0]}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
+        {event.tracks.length > 0 && (
+          <div>
+            <p className="text-sm font-medium mb-2">Tracks:</p>
             <div className="flex flex-wrap gap-1">
-              {event.tracks.slice(0, 4).map((track, index) => (
+              {event.tracks.slice(0, 3).map((track, index) => (
                 <Badge key={index} variant="secondary" size="sm">
                   {track}
                 </Badge>
               ))}
-              {event.tracks.length > 4 && (
+              {event.tracks.length > 3 && (
                 <Badge variant="secondary" size="sm">
-                  +{event.tracks.length - 4} more
+                  +{event.tracks.length - 3} more
                 </Badge>
               )}
             </div>
-            
-            <div className="text-sm text-gray-500">
-              by {event.organizers.join(', ')}
-            </div>
           </div>
-        </div>
-      </div>
+        )}
+
+        {/* Organizers */}
+        {event.organizers.length > 0 && (
+          <div>
+            <p className="text-sm font-medium mb-1">Organized by:</p>
+            <p className="text-sm text-gray-600">{event.organizers.join(', ')}</p>
+          </div>
+        )}
+
+        {/* Prizes and Action */}
+        {event.prizes.length > 0 && (
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center">
+              <Trophy className="h-4 w-4 text-yellow-500 mr-1" />
+              <span className="text-sm font-medium">
+                {event.prizes[0]}
+              </span>
+            </div>
+            <Button size="sm">
+              <Link to={`/events/${event._id}`}>View Details</Link>
+            </Button>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">Error: {error}</div>
+          <Button onClick={fetchEvents}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold font-heading mb-4">
-          Discover Amazing Hackathons
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl">
-          Join hackathons from around the world. Build, compete, and connect with fellow innovators.
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold font-heading mb-4">
+              Discover Amazing Hackathons
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl">
+              Join hackathons from around the world. Build, compete, and connect with fellow innovators.
+            </p>
+          </div>
+          {isAuthenticated && isOrganizer && (
+            <Button onClick={() => setShowCreateForm(!showCreateForm)} className="flex items-center">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Create Event Form - Only for organizers */}
+      {showCreateForm && isAuthenticated && isOrganizer && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Create New Event</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Event Title*"
+                placeholder="e.g., SynapHack 3.0"
+                value={newEvent.title}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+              />
+              <Input
+                label="Theme"
+                placeholder="e.g., Innovation & Technology"
+                value={newEvent.theme}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, theme: e.target.value }))}
+              />
+            </div>
+            
+            <Textarea
+              label="Description*"
+              placeholder="Describe your hackathon..."
+              rows={3}
+              value={newEvent.description}
+              onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="Start Date*"
+                type="date"
+                value={newEvent.startDate}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, startDate: e.target.value }))}
+              />
+              <Input
+                label="End Date*"
+                type="date"
+                value={newEvent.endDate}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, endDate: e.target.value }))}
+              />
+              <Input
+                label="Registration Deadline*"
+                type="date"
+                value={newEvent.registrationDeadline}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, registrationDeadline: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="Max Participants"
+                type="number"
+                value={newEvent.maxParticipants}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, maxParticipants: parseInt(e.target.value) || 100 }))}
+              />
+              <Input
+                label="Location"
+                placeholder="e.g., Virtual, San Francisco"
+                value={newEvent.location}
+                onChange={(e) => setNewEvent(prev => ({ ...prev, location: e.target.value }))}
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <select
+                  value={newEvent.type}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, type: e.target.value as any }))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                >
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={createEvent} disabled={!newEvent.title || !newEvent.description}>
+                Create Event
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search and Filters */}
       <div className="mb-8 space-y-4">
@@ -405,16 +472,6 @@ export const EventsPage: React.FC = () => {
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
-
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              {statuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
           </div>
 
           {/* View Mode Toggle */}
@@ -451,13 +508,9 @@ export const EventsPage: React.FC = () => {
             ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6'
             : 'space-y-4'
         }>
-          {filteredEvents.map((event) => 
-            viewMode === 'grid' ? (
-              <EventCard key={event.id} event={event} />
-            ) : (
-              <EventListItem key={event.id} event={event} />
-            )
-          )}
+          {filteredEvents.map((event) => (
+            <EventCard key={event._id} event={event} />
+          ))}
         </div>
       ) : (
         <div className="text-center py-16">
@@ -471,12 +524,11 @@ export const EventsPage: React.FC = () => {
             </p>
             <Button
               variant="outline"
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedTheme('All');
-                setSelectedType('All');
-                setSelectedStatus('All');
-              }}
+                             onClick={() => {
+                 setSearchTerm('');
+                 setSelectedTheme('All');
+                 setSelectedType('All');
+               }}
             >
               Clear Filters
             </Button>

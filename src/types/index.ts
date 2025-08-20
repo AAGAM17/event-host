@@ -251,7 +251,7 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  role: 'participant' | 'organizer';
+  role: 'participant' | 'organizer' | 'judge';
   university?: string;
   skills?: string[];
 }

@@ -14,12 +14,15 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Eye
+  Eye,
+  Shield,
+  X
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import { Input, Textarea } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
+import PlagiarismDetectionSystem from '../components/PlagiarismDetectionSystem';
 
 interface SubmissionFormData {
   title: string;
@@ -100,6 +103,7 @@ export const SubmissionPage: React.FC = () => {
     currentSubmission?.technologies || []
   );
   const [customTech, setCustomTech] = useState('');
+  const [showPlagiarismCheck, setShowPlagiarismCheck] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SubmissionFormData>({
     defaultValues: {
@@ -368,6 +372,25 @@ export const SubmissionPage: React.FC = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Plagiarism Check Section */}
+      <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Shield className="w-6 h-6 text-blue-600" />
+            <h3 className="text-lg font-semibold text-blue-900">AI Originality Check</h3>
+          </div>
+          <p className="text-blue-700 mb-4">
+            Verify your project's originality with our advanced AI detection system before submission.
+          </p>
+          <button
+            onClick={() => setShowPlagiarismCheck(true)}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Check for Plagiarism
+          </button>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -570,6 +593,21 @@ export const SubmissionPage: React.FC = () => {
       {activeTab === 'submission' && renderSubmissionForm()}
       {activeTab === 'documents' && renderDocuments()}
       {activeTab === 'evaluation' && renderEvaluation()}
+
+      {/* Modal for plagiarism checker */}
+      {showPlagiarismCheck && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-auto relative">
+            <button
+              onClick={() => setShowPlagiarismCheck(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10 bg-white rounded-full p-1"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <PlagiarismDetectionSystem />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
