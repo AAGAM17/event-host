@@ -1,23 +1,15 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { useAuth } from "../context/AuthContext";
 import ParticipantDashboard from "./ParticipantDashboard";
 import OrganizerDashboard from "./OrganizerDashboard";
 import JudgeDashboard from "./JudgeDashboard";
 
 const DashboardPage = () => {
-  const [role, setRole] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const role = useMemo(() => user?.role ?? null, [user]);
 
-  useEffect(() => {
-    const storedRole = localStorage.getItem("userRole");
-    if (!storedRole) {
-      navigate("/login");
-    } else {
-      setRole(storedRole);
-    }
-  }, [navigate]);
-
-  if (!role) return null;
+  if (loading) return null;
+  if (!role) return <div>Unknown role</div>;
 
   switch (role) {
     case "participant":

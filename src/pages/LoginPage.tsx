@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { useAuth } from '../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const apiBase = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
 
@@ -32,10 +34,8 @@ export const LoginPage: React.FC = () => {
       }
       
       if (data?.token) {
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('user_role', data.user.role);
-        localStorage.setItem('user_name', data.user.name);
-        localStorage.setItem('user_id', data.user.id);
+        // Update auth context so protected routes recognize the session immediately
+        login(data.token, data.user);
         
         // Redirect based on role
         if (data.user.role === 'organizer') {
