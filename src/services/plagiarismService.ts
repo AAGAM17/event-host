@@ -178,13 +178,6 @@ class PlagiarismDetectionService {
    * Normalize code by removing comments, whitespace, and variable names
    */
   private normalizeCode(code: string): string {
-    return code
-      // Remove comments
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      .replace(/\/\/.*$/gm, '')
-      // Remove extra whitespace
-      .replace(/\s+/g, ' ')
-      // Remove variable names (basic approach)
     // List of common JS/TS keywords to exclude from replacement
     const keywords = new Set([
       'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
@@ -424,6 +417,78 @@ class PlagiarismDetectionService {
    */
   removeSubmission(id: string): boolean {
     return this.existingSubmissions.delete(id);
+  }
+
+  /**
+   * Get analysis for a specific submission synchronously by comparing it with others.
+   * Returns null if submission not found.
+   */
+  getAnalysisForSubmission(id: string): PlagiarismAnalysis | null {
+    const submission = this.existingSubmissions.get(id);
+    if (!submission) return null;
+
+    // Build similarity list synchronously
+    const similarities = Array.from(this.existingSubmissions)
+      .filter(([otherId]) => otherId !== id)
+      .map(([otherId, other]) => {
+        const similarity = this.calculateSimilaritySync(submission, other);
+        return {
+          projectId: otherId,
+          projectName: other.title,
+          similarity: similarity.overall,
+          matchedSections: similarity.matchedSections,
+          submissionDate: other.submissionDate.toISOString().split('T')[0],
+          author: other.teamId,
+        } as SimilarityResult;
+      })
+      .filter((s) => s.similarity > PlagiarismDetectionService.MINIMUM_SIMILARITY_THRESHOLD)
+      .sort((a, b) => b.similarity - a.similarity);
+
+    const aiAnalysis = this.performAIAnalysis(submission);
+    const overallSimilarity = Math.max(...similarities.map((s) => s.similarity), 0);
+
+    return {
+      overallSimilarity,
+      similarities,
+      aiAnalysis,
+      riskLevel: this.calculateRiskLevel(overallSimilarity),
+    };
+  }
+
+  /**
+   * Synchronous similarity calculation used by getAnalysisForSubmission
+   */
+  private calculateSimilaritySync(
+    project1: ProjectSubmission,
+    project2: ProjectSubmission
+  ): {
+    overall: number;
+    matchedSections: string[];
+  } {
+    const scores = {
+      title: this.textSimilarity(project1.title, project2.title),
+      description: this.textSimilarity(project1.description, project2.description),
+      documentation: this.textSimilarity(project1.documentation, project2.documentation),
+      code: this.codeSimilarity(project1.codeFiles, project2.codeFiles),
+      structure: this.structuralSimilarity(project1.codeFiles, project2.codeFiles),
+    };
+
+    const matchedSections: string[] = [];
+    if (scores.title > 70) matchedSections.push('Project Title');
+    if (scores.description > 60) matchedSections.push('Description');
+    if (scores.documentation > 50) matchedSections.push('Documentation');
+    if (scores.code > 40) matchedSections.push('Code Implementation');
+    if (scores.structure > 50) matchedSections.push('Project Structure');
+
+    const overall = Math.round(
+      scores.title * 0.1 +
+      scores.description * 0.2 +
+      scores.documentation * 0.2 +
+      scores.code * 0.3 +
+      scores.structure * 0.2
+    );
+
+    return { overall, matchedSections };
   }
 }
 

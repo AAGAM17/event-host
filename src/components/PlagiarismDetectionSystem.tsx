@@ -478,7 +478,7 @@ const PlagiarismDetectionSystem = () => {
                           {submission.submissionTime}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-gray-900">{submission.similarity}%</div>
+                          <div className="text-sm font-semibold text-gray-900">{submission.similarity != null ? `${submission.similarity}%` : '—'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
@@ -487,8 +487,8 @@ const PlagiarismDetectionSystem = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getRiskColor(submission.riskLevel)}`}>
-                            {submission.riskLevel}
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getRiskColor(submission.riskLevel ?? 'PENDING')}`}>
+                            {submission.riskLevel ?? 'PENDING'}
                           </span>
                         </td>
                       </tr>
